@@ -73,8 +73,20 @@
     return [self.defaults integerForKey:key];
 }
 
+- (NSString *)stringForKey:(NSString*)key {
+    return [self.defaults stringForKey:key];
+}
+
+- (NSArray *)arrayForKey:(NSString*)key {
+    return [self.defaults arrayForKey:key];
+}
+
 - (id)objectForKey:(NSString*)key {
     return [self.defaults objectForKey:key];
+}
+
+- (void) removeObjectForKey:(NSString *) key {
+    [self.defaults removeObjectForKey:key];
 }
 
 - (BOOL)synchronize {

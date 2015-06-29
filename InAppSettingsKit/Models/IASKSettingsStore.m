@@ -30,6 +30,12 @@
     return nil;
 }
 
+- (void) removeObjectForKey:(NSString *) key
+{
+    [NSException raise:@"Unimplemented"
+                format:@"removeObjectForKey: must be implemented in subclasses of IASKAbstractSettingsStore"];
+}
+
 - (void)setBool:(BOOL)value forKey:(NSString*)key {
     [self setObject:[NSNumber numberWithBool:value] forKey:key];
 }
@@ -59,6 +65,24 @@
 
 - (double)doubleForKey:(NSString*)key {
     return [[self objectForKey:key] doubleValue];
+}
+
+- (NSArray *)arrayForKey:(NSString*)key {
+    NSObject * obj = [self objectForKey:key];
+    if ([obj isKindOfClass:[NSArray class]]) {
+        return (NSArray *) obj;
+    }
+    return nil;
+}
+
+- (NSString *)stringForKey:(NSString*)key {
+    NSObject * obj = [self objectForKey:key];
+    if ([obj isKindOfClass:[NSString class]]) {
+        return (NSString *) obj;
+    } else if ([obj respondsToSelector:@selector(stringValue)]) {
+        return [obj performSelector:@selector(stringValue)];
+    }
+    return [NSString stringWithFormat:@"%@", obj];
 }
 
 - (BOOL)synchronize {
