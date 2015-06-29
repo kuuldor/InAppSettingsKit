@@ -18,6 +18,7 @@
 #import "IASKAppSettingsViewController.h"
 #import "IASKSettingsReader.h"
 #import "IASKSettingsStoreUserDefaults.h"
+#import "IASKSettingsStoreFile.h"
 #import "IASKPSSliderSpecifierViewCell.h"
 #import "IASKPSTextFieldSpecifierViewCell.h"
 #import "IASKSwitch.h"
@@ -81,6 +82,12 @@ CGRect IASKCGRectSwap(CGRect rect);
 		_settingsStore = [[IASKSettingsStoreUserDefaults alloc] init];
 	}
 	return _settingsStore;
+}
+
+- (void)setSettingsStorePath:(NSString *) filePath {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
+        self.settingsStore = [[IASKSettingsStoreFile alloc] initWithPath:filePath];
+    }
 }
 
 - (NSString*)file {
@@ -160,6 +167,10 @@ CGRect IASKCGRectSwap(CGRect rect);
 		_showDoneButton = NO;
 	}
 	return self;
+}
+
+-(void) awakeFromNib {
+    [self configure];
 }
 
 - (void)configure {

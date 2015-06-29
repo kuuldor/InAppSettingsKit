@@ -71,4 +71,5 @@
 - (void)synchronizeSettings;
 - (void)dismiss:(id)sender;
 - (void)setHiddenKeys:(NSSet*)hiddenKeys animated:(BOOL)animated;
+- (void)setSettingsStorePath:(NSString *) filePath;
 @end
