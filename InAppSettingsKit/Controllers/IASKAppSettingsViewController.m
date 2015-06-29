@@ -244,6 +244,8 @@ CGRect IASKCGRectSwap(CGRect rect);
 
 	// hide the keyboard
     [self.currentFirstResponder resignFirstResponder];
+    
+    [self synchronizeSettings];
 	
 	[super viewWillDisappear:animated];
 }
