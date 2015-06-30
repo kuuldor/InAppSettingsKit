@@ -48,9 +48,14 @@
     [_dict removeObjectForKey:key];
 }
 
-
+-(void) delayedSynchronize {
+    [_dict writeToFile:_filePath atomically:YES];
+}
 - (BOOL)synchronize {
-    return [_dict writeToFile:_filePath atomically:YES];
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayedSynchronize) object:nil];
+    [self performSelector:@selector(delayedSynchronize) withObject:nil afterDelay:0.2];
+    
+    return YES;
 }
 
 @end
