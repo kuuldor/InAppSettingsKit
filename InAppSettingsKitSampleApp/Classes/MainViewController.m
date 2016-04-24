@@ -191,8 +191,8 @@
 
 #pragma mark kIASKAppSettingChanged notification
 - (void)settingDidChange:(NSNotification*)notification {
-	if ([notification.object isEqual:@"AutoConnect"]) {
-		IASKAppSettingsViewController *activeController = self.tabBarController.selectedIndex ? self.tabAppSettingsViewController : self.appSettingsViewController;
+	if ([notification.userInfo.allKeys.firstObject isEqual:@"AutoConnect"]) {
+		IASKAppSettingsViewController *activeController = notification.object;
 		BOOL enabled = (BOOL)[[notification.userInfo objectForKey:@"AutoConnect"] intValue];
 		[activeController setHiddenKeys:enabled ? nil : [NSSet setWithObjects:@"AutoConnectLogin", @"AutoConnectPassword", nil] animated:YES];
 	}
@@ -201,7 +201,7 @@
 #pragma mark UITextViewDelegate (for CustomViewCell)
 - (void)textViewDidChange:(UITextView *)textView {
     [[NSUserDefaults standardUserDefaults] setObject:textView.text forKey:@"customCell"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:kIASKAppSettingChanged object:@"customCell"];
+	[[NSNotificationCenter defaultCenter] postNotificationName:kIASKAppSettingChanged object:self userInfo:@{@"customCell" : textView.text}];
 }
 
 #pragma mark - UIPopoverControllerDelegate
