@@ -213,13 +213,16 @@ CGRect IASKCGRectSwap(CGRect rect);
 		self.title = NSLocalizedString(@"Settings", @"");
 	}
 	
+    NSNotificationCenter *dc = NSNotificationCenter.defaultCenter;
 	if ([self.settingsStore isKindOfClass:[IASKSettingsStoreUserDefaults class]]) {
-		NSNotificationCenter *dc = NSNotificationCenter.defaultCenter;
 		IASKSettingsStoreUserDefaults *udSettingsStore = (id)self.settingsStore;
 		[dc addObserver:self selector:@selector(userDefaultsDidChange) name:NSUserDefaultsDidChangeNotification object:udSettingsStore.defaults];
 		[dc addObserver:self selector:@selector(didChangeSettingViaIASK:) name:kIASKAppSettingChanged object:nil];
 		[self userDefaultsDidChange]; // force update in case of changes while we were hidden
 	}
+    
+    [dc addObserver:self selector:@selector(reload) name:kIASKCustomValueChangedNotification object:nil];
+
 	[super viewWillAppear:animated];
 }
 
@@ -542,10 +545,17 @@ CGRect IASKCGRectSwap(CGRect rect);
 	}
 	
 	UITableViewCell* cell = [self tableView:tableView newCellForSpecifier:specifier];
+    
+    NSString * subtitle = specifier.subtitle;
+    if ([subtitle isEqualToString:kIASKCustomSubtitle]) {
+        if ([self.delegate respondsToSelector:@selector(settingsViewController:subtitleForSpecifier:)]) {
+            subtitle = [self.delegate settingsViewController:self subtitleForSpecifier:specifier];
+        }
+    }
 
 	if ([specifier.type isEqualToString:kIASKPSToggleSwitchSpecifier]) {
 		cell.textLabel.text = specifier.title;
-		cell.detailTextLabel.text = specifier.subtitle;
+		cell.detailTextLabel.text = subtitle;
 
 		id currentValue = [self.settingsStore objectForKey:specifier.key];
 		BOOL toggleState;
@@ -571,15 +581,18 @@ CGRect IASKCGRectSwap(CGRect rect);
 	}
 	else if ([specifier.type isEqualToString:kIASKPSTitleValueSpecifier]) {
 		cell.textLabel.text = specifier.title;
-		id value = [self.settingsStore objectForKey:specifier.key] ? : specifier.defaultValue;
-		
-		NSString *stringValue;
-		if (specifier.multipleValues || specifier.multipleTitles) {
-			stringValue = [specifier titleForCurrentValue:value];
-		} else {
-			stringValue = [value description];
-		}
-		
+        NSString *stringValue;
+        if (subtitle == nil) {
+            id value = [self.settingsStore objectForKey:specifier.key] ? : specifier.defaultValue;
+            
+            if (specifier.multipleValues || specifier.multipleTitles) {
+                stringValue = [specifier titleForCurrentValue:value];
+            } else {
+                stringValue = [value description];
+            }
+        } else {
+            stringValue = subtitle;
+        }
 		cell.detailTextLabel.text = stringValue;
 		cell.userInteractionEnabled = NO;
 	}
@@ -624,15 +637,15 @@ CGRect IASKCGRectSwap(CGRect rect);
 	}
 	else if ([specifier.type isEqualToString:kIASKPSChildPaneSpecifier]) {
 		cell.textLabel.text = specifier.title;
-		cell.detailTextLabel.text = specifier.subtitle;
+		cell.detailTextLabel.text = subtitle;
 	} else if ([specifier.type isEqualToString:kIASKOpenURLSpecifier] || [specifier.type isEqualToString:kIASKMailComposeSpecifier]) {
 		cell.textLabel.text = specifier.title;
-		cell.detailTextLabel.text = specifier.subtitle ? : [specifier.defaultValue description];
+		cell.detailTextLabel.text = subtitle ? : [specifier.defaultValue description];
 		cell.accessoryType = (specifier.textAlignment == NSTextAlignmentLeft) ? UITableViewCellAccessoryDisclosureIndicator : UITableViewCellAccessoryNone;
 	} else if ([specifier.type isEqualToString:kIASKButtonSpecifier]) {
 		NSString *value = [self.settingsStore objectForKey:specifier.key];
 		cell.textLabel.text = [value isKindOfClass:[NSString class]] ? [self.settingsReader titleForStringId:value] : specifier.title;
-		cell.detailTextLabel.text = specifier.subtitle;
+		cell.detailTextLabel.text = subtitle;
 		IASK_IF_IOS7_OR_GREATER
 		(if (specifier.textAlignment != NSTextAlignmentLeft) {
 			cell.textLabel.textColor = tableView.tintColor;
