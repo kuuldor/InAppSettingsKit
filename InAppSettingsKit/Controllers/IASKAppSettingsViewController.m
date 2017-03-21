@@ -171,6 +171,7 @@ CGRect IASKCGRectSwap(CGRect rect);
 }
 
 -(void) awakeFromNib {
+    [super awakeFromNib];
     [self configure];
 }
 
