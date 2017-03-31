@@ -603,7 +603,7 @@ CGRect IASKCGRectSwap(CGRect rect);
 	else if ([specifier.type isEqualToString:kIASKPSTitleValueSpecifier]) {
 		cell.textLabel.text = specifier.title;
         NSString *stringValue;
-        if (subtitle == nil) {
+        if (subtitle == nil || [subtitle isEqualToString:@""]) {
             id value = [self.settingsStore objectForKey:specifier.key] ? : specifier.defaultValue;
             
             if (specifier.multipleValues || specifier.multipleTitles) {
